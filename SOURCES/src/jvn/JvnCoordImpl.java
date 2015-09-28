@@ -23,6 +23,8 @@ public class JvnCoordImpl
   **/
 	private JvnCoordImpl() throws Exception {
 		// to be completed
+		
+		// une liste des serveurs distants
 	}
 
   /**
@@ -33,6 +35,8 @@ public class JvnCoordImpl
   public int jvnGetObjectId()
   throws java.rmi.RemoteException,jvn.JvnException {
     // to be completed 
+	
+	  // ajout de l'object dans la table des ojets 
     return 0;
   }
   
@@ -58,6 +62,12 @@ public class JvnCoordImpl
   public JvnObject jvnLookupObject(String jon, JvnRemoteServer js)
   throws java.rmi.RemoteException,jvn.JvnException{
     // to be completed 
+	  
+	  // recuperer dans la table le serveur js 
+	  
+	  // recuperer l'objet referencer par jon
+	  
+	  // envoyer une requete au serveur
     return null;
   }
   
@@ -71,6 +81,12 @@ public class JvnCoordImpl
    public Serializable jvnLockRead(int joi, JvnRemoteServer js)
    throws java.rmi.RemoteException, JvnException{
     // to be completed
+	   
+	   // recuperer dans la table le serveur js 
+		  
+	   // recuperer l'objet referencer par jon
+		  
+	   // envoyer une requete au serveur
     return null;
    }
 

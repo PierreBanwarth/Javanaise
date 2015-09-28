@@ -8,17 +8,22 @@
 
 package jvn;
 
+import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.io.*;
-
-
+import java.util.HashMap;
 
 public class JvnServerImpl 	
               extends UnicastRemoteObject 
 							implements JvnLocalServer, JvnRemoteServer{
-	
-  // A JVN server is managed as a singleton 
+
+	// A JVN server is managed as a singleton
 	private static JvnServerImpl js = null;
+	
+	private JvnRemoteCoord coord;
+	// HashMap to map Objects and Integers
+	private HashMap<Integer, JvnObject> objects = new HashMap<Integer, JvnObject>();
+  // A JVN server is managed as a singleton 
 
   /**
   * Default constructor
@@ -26,6 +31,8 @@ public class JvnServerImpl
   **/
 	private JvnServerImpl() throws Exception {
 		super();
+		// premiere connexion avec le coordinateur
+		
 		// to be completed
 	}
 	
@@ -52,6 +59,7 @@ public class JvnServerImpl
 	public  void jvnTerminate()
 	throws jvn.JvnException {
     // to be completed 
+		// commincation avec le coordinateur pour supprimer le serveur de la liste
 	} 
 	
 	/**
@@ -60,9 +68,18 @@ public class JvnServerImpl
 	* @throws JvnException
 	**/
 	public  JvnObject jvnCreateObject(Serializable o)
-	throws jvn.JvnException { 
+	throws jvn.JvnException {
 		// to be completed 
-		return null; 
+		
+		// communication le coordinateur pour creer l'objet 
+		JvnObjectImpl object;
+		try {
+			object = new JvnObjectImpl(coord.jvnGetObjectId());
+			object.setObject(o);
+			return object;
+		} catch (RemoteException e) {
+			throw new JvnException("Erreur lors de la création de l'objet");
+		}
 	}
 	
 	/**

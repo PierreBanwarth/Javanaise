@@ -7,12 +7,19 @@
 
 package irc;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.Serializable;
 
-
-import jvn.*;
-import java.io.*;
+import jvn.JvnException;
+import jvn.JvnObject;
+import jvn.JvnServerImpl;
 
 
 public class Irc {

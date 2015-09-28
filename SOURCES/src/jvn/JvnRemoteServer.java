@@ -7,9 +7,8 @@
 
 package jvn;
 
-import java.rmi.*;
-import java.io.*;
-
+import java.io.Serializable;
+import java.rmi.Remote;
 
 /**
  * Remote interface of a JVN server (used by a remote JvnCoord)
