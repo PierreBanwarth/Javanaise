@@ -21,10 +21,10 @@ public class JvnCoordImpl
   * Default constructor
   * @throws JvnException
   **/
+	private int nbObject;
 	private JvnCoordImpl() throws Exception {
 		// to be completed
-		
-		// une liste des serveurs distants
+		nbObject = 0;	 
 	}
 
   /**
@@ -34,10 +34,8 @@ public class JvnCoordImpl
   **/
   public int jvnGetObjectId()
   throws java.rmi.RemoteException,jvn.JvnException {
-    // to be completed 
-	
-	  // ajout de l'object dans la table des ojets 
-    return 0;
+    nbObject++;
+    return nbObject;
   }
   
   /**

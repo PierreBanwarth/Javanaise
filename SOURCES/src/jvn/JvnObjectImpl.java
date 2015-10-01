@@ -64,17 +64,13 @@ public class JvnObjectImpl implements JvnObject {
 		case RLT:
 			server = JvnServerImpl.jvnGetServer();
 			server.jvnLockRead(this.jvnGetObjectId());
-			this.state = State.WLT;
+			this.state = State.RLC;
 			break;
 		case WLT:
 			server = JvnServerImpl.jvnGetServer();
 			server.jvnLockRead(this.jvnGetObjectId());
 			this.state = State.WLC;
 			break;
-		case WLC:
-			this.state = State.WLT;
-			break;
-		
 		default:
 			throw new JvnException("[jvnUnlock()] State error");
 		}
@@ -82,26 +78,36 @@ public class JvnObjectImpl implements JvnObject {
 	}
 
 	public int jvnGetObjectId() {
-		return 0;
+		return this.id;
 	}
 
 	public Serializable jvnGetObjectState() {
-		return null;
+		return this.serial;
 	}
 
 	public void jvnInvalidateReader() {
-		
+		if(this.state == State.RLC){
+			this.state = State.NL;
+		}
 	}
 
-	public Serializable jvnInvalidateWriter() {
-		return null;
+	public Serializable jvnInvalidateWriter() throws JvnException {
+		if(this.state == State.WLC){
+			this.state = State.NL;
+		}
+		
+		return serial;
 	}
 
 	public Serializable jvnInvalidateWriterForReader() {
-		return null;
+		if(this.state == State.WLC){
+			this.state = State.RLC;
+		}
+		
+		return serial;
 	}
 	public void setObject(Serializable o) {
-		// TODO Auto-generated method stub
+		this.serial = o;
 		
 	}
 
