@@ -2,7 +2,7 @@ package jvn;
 
 public enum State {
 	
-	NL, RLC, WLC, RLT, WLT, RLT_WLC;
+	NL, RC, WC, R, W, RWC;
 	// no lock
 	// Read lock cached 
 	// write lock cached 

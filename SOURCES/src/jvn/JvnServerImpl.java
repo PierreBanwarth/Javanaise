@@ -8,32 +8,46 @@
 
 package jvn;
 
-import java.io.Serializable;
-import java.rmi.RemoteException;
+import java.rmi.Naming;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
+
+
+
+
+
 
 public class JvnServerImpl 	
               extends UnicastRemoteObject 
 							implements JvnLocalServer, JvnRemoteServer{
-
-	// A JVN server is managed as a singleton
+	
+  // A JVN server is managed as a singleton 
 	private static JvnServerImpl js = null;
 	
-	private JvnRemoteCoord coord;
-	// HashMap to map Objects and Integers
-	private HashMap<Integer, JvnObject> objects = new HashMap<Integer, JvnObject>();
-  // A JVN server is managed as a singleton 
+  // Location of rmiregistry
+  private String hostName = "//localhost:5555/COORDINATOR/";
+	
+  // Location of The coordinator in the rmiregistry
+  private JvnRemoteCoord coordinator;
 
+  // Table containing <Id , JvnObject> couples
+  private Hashtable<Integer, JvnObject> objectsTable;
+  
+  
   /**
   * Default constructor
   * @throws JvnException
   **/
 	private JvnServerImpl() throws Exception {
 		super();
-		// premiere connexion avec le coordinateur
+		// to be completed 
+
+		// Get the coordinator reference
+		this.coordinator = (JvnRemoteCoord) Naming.lookup(hostName);
 		
-		// to be completed
+		// Create the objects Table
+		this.objectsTable = new Hashtable<Integer, JvnObject>();
 	}
 	
   /**
@@ -58,8 +72,12 @@ public class JvnServerImpl
 	**/
 	public  void jvnTerminate()
 	throws jvn.JvnException {
-    // to be completed 
-		// commincation avec le coordinateur pour supprimer le serveur de la liste
+		// to be completed 
+		try {
+			this.coordinator.jvnTerminate(js);
+		} catch (Exception e) {
+			throw new JvnException("jvnTerminate: "+e);
+		}
 	} 
 	
 	/**
@@ -68,18 +86,25 @@ public class JvnServerImpl
 	* @throws JvnException
 	**/
 	public  JvnObject jvnCreateObject(Serializable o)
-	throws jvn.JvnException {
+	throws jvn.JvnException { 
 		// to be completed 
-		
-		// communication le coordinateur pour creer l'objet 
-		JvnObjectImpl object;
+		int joi = 1;
+		JvnObject jo = null;
+
 		try {
-			object = new JvnObjectImpl(coord.jvnGetObjectId());
-			object.setObject(o);
-			return object;
-		} catch (RemoteException e) {
-			throw new JvnException("Erreur lors de la création de l'objet");
+			// If we get an id, create a new jvnObject ( with write lock by default) AND
+			// create a new entry in the lock and object cache
+			joi = this.coordinator.jvnGetObjectId();
+	
+			jo = new JvnObjectImpl(joi);
+				
+			objectsTable.put(joi,  jo);
+			
+		} catch (Exception e) {
+			throw new JvnException("jvnCreateObject: "+e);
 		}
+		
+		return jo; 
 	}
 	
 	/**
@@ -91,6 +116,12 @@ public class JvnServerImpl
 	public  void jvnRegisterObject(String jon, JvnObject jo)
 	throws jvn.JvnException {
 		// to be completed 
+		try {
+			// create the shared object in the coordinator store
+			this.coordinator.jvnRegisterObject(jon, jo, js);
+		} catch (Exception e) {
+			throw new JvnException("jvnRegisterObject: "+e);
+		}
 	}
 	
 	/**
@@ -101,8 +132,17 @@ public class JvnServerImpl
 	**/
 	public  JvnObject jvnLookupObject(String jon)
 	throws jvn.JvnException {
-    // to be completed 
-		return null;
+		// to be completed 
+		try{
+			JvnObject tmp = this.coordinator.jvnLookupObject(jon, this);
+	        if (tmp != null) {
+	            this.objectsTable.put(tmp.jvnGetObjectId(), tmp);
+	        }
+	        return tmp;
+		}catch(Exception e){
+			throw new JvnException("jvnLookupObject in jvnServerImpl: "+e);
+		}
+        
 	}	
 	
 	/**
@@ -114,7 +154,19 @@ public class JvnServerImpl
    public Serializable jvnLockRead(int joi)
 	 throws JvnException {
 		// to be completed 
-		return null;
+	   
+	   try{
+		   
+		   Serializable objectState = objectsTable.get(joi).jvnGetObjectState();
+			
+			// Ask the coordinator for a read lock and update lock cache
+			objectState =  this.coordinator.jvnLockRead(joi, js);
+			
+			return objectState;
+			
+		} catch (Exception e) {
+			throw new JvnException("jvnLockRead in jvnServerImpl: "+e);
+		}
 
 	}	
 	/**
@@ -126,7 +178,18 @@ public class JvnServerImpl
    public Serializable jvnLockWrite(int joi)
 	 throws JvnException {
 		// to be completed 
-		return null;
+	   try{
+	   
+		   Serializable objectState = objectsTable.get(joi).jvnGetObjectState();
+	
+		   // Ask the coordinator for a write lock and update lock cache
+		   objectState = this.coordinator.jvnLockWrite(joi, js);
+		   
+		   return objectState;
+
+		} catch (Exception e) {
+			throw new JvnException("jvnLockWrite in jvnServerImpl: "+e);
+		}
 	}	
 
 	
@@ -140,6 +203,7 @@ public class JvnServerImpl
   public void jvnInvalidateReader(int joi)
 	throws java.rmi.RemoteException,jvn.JvnException {
 		// to be completed 
+	    objectsTable.get(joi).jvnInvalidateReader();
 	};
 	    
 	/**
@@ -151,7 +215,7 @@ public class JvnServerImpl
   public Serializable jvnInvalidateWriter(int joi)
 	throws java.rmi.RemoteException,jvn.JvnException { 
 		// to be completed 
-		return null;
+        return objectsTable.get(joi).jvnInvalidateWriter();
 	};
 	
 	/**
@@ -163,7 +227,7 @@ public class JvnServerImpl
    public Serializable jvnInvalidateWriterForReader(int joi)
 	 throws java.rmi.RemoteException,jvn.JvnException { 
 		// to be completed 
-		return null;
+		return objectsTable.get(joi).jvnInvalidateWriterForReader();
 	 };
 
 }
