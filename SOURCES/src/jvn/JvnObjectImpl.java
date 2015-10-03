@@ -8,34 +8,33 @@ public class JvnObjectImpl implements JvnObject{
 	//private State state = State.W;
 	// ATTENTION : l'état (state) n'est pas forcément l'état du lock. Ca peut aussi être la phrase à écrire sur le chat.
 	// Il s'agit donc d'un type générique sérialisable qui doit être idéalement défini par la suite en fonction du type d'objet instancié.
-	private Serializable state = null;
+	private State state = State.W;
+	private Serializable objet = null;
 	
 	private int id;
 	
 	public JvnObjectImpl(int id){
 		super();
 		this.id = id;
-		this.state = State.W;
+		state = State.W;
 	}
 
 	public  void  jvnLockRead() throws JvnException {
 		// TODO Auto-generated method stub
-		JvnServerImpl server;
-		switch((State)state){
+		System.out.println("lockR :"+state);
+		switch(state){
 		case NL:
-			server = JvnServerImpl.jvnGetServer();
-			server.jvnLockRead(this.jvnGetObjectId());
-			this.state = State.R;
+			objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.id);
+			state = State.R;
 			break;
 		case R:
 		case RC:
-			server = JvnServerImpl.jvnGetServer();
-			server.jvnLockRead(this.jvnGetObjectId());
-			this.state = State.R;
+			JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
+			state = State.R;
 			break;
 		case WC:
 		case RWC:
-			this.state = State.RWC;
+			state = State.RWC;
 			break;
 		case W:
 			throw new JvnException("[jvnLockRead()] State error in JvnObjectImpl");
@@ -45,18 +44,19 @@ public class JvnObjectImpl implements JvnObject{
 
 	public void jvnLockWrite() throws JvnException {
 		// TODO Auto-generated method stub
-		JvnServerImpl server;
-		switch((State)state){
+		System.out.println("lockW :"+state);
+		switch(state){
 		case NL:
+			objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
+			break;
 		case RC:
-			server = JvnServerImpl.jvnGetServer();
-			server.jvnLockWrite(this.jvnGetObjectId());
-			this.state = State.W;
+			JvnServerImpl.jvnGetServer().jvnLockWrite(this.jvnGetObjectId());
+			state = State.W;
 			break;
 		case W:
 		case WC:
 		case RWC:
-			this.state = State.W;
+			state = State.W;
 			break;
 		case R:
 			throw new JvnException("[jvnLockWrite()] State error in JvnObjectImpl");
@@ -66,22 +66,21 @@ public class JvnObjectImpl implements JvnObject{
 
 	public void jvnUnLock() throws JvnException {
 		// TODO Auto-generated method stub
-		JvnServerImpl server;
-		switch((State)state){
+		System.out.println("unlock :"+state);
+		switch(state){
 			case R:
 			case RC:
 			case RWC:
-				server = JvnServerImpl.jvnGetServer();
-				server.jvnLockRead(this.jvnGetObjectId());
-				this.state = State.RC;
+				JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
+				state = State.RC;
 				break;
 			case W:
 			case WC:
-				server = JvnServerImpl.jvnGetServer();
-				server.jvnLockRead(this.jvnGetObjectId());
-				this.state = State.WC;
+				JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
+				state = State.WC;
 				break;
 			case NL:
+				objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
 				break;
 		}
 		
@@ -89,18 +88,18 @@ public class JvnObjectImpl implements JvnObject{
 
 	public int jvnGetObjectId() throws JvnException {
 		// TODO Auto-generated method stub
-		return this.id;
+		return id;
 	}
 
 	public Serializable jvnGetObjectState() throws JvnException {
 		// TODO Auto-generated method stub
-		return this.state;
+		return objet;
 	}
 
 	public void jvnInvalidateReader() throws JvnException {
 		// TODO Auto-generated method stub
-		if(this.state == State.RC || this.state == State.R){
-			this.state = State.NL;
+		if(state == State.RC || state == State.R){
+			state = State.NL;
 		} 
 		
 	}
