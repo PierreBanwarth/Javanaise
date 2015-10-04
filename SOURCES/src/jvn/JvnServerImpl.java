@@ -74,7 +74,6 @@ public class JvnServerImpl
 	throws jvn.JvnException {
 		// to be completed 
 		try {
-			this.coordinator.jvnTerminate(js);
 		} catch (Exception e) {
 			throw new JvnException("jvnTerminate: "+e);
 		}
@@ -97,12 +96,7 @@ public class JvnServerImpl
 		try {
 			// If we get an id, create a new jvnObject ( with write lock by default) AND
 			// create a new entry in the lock and object cache
-			joi = this.coordinator.jvnGetObjectId();
 	
-	/*      jo = new JvnObjectImpl(joi);
-				
-			objectsTable.put(joi,  jo);
-	*/
 		} catch (Exception e) {
 			throw new JvnException("jvnCreateObject: "+e);
 		}
@@ -136,16 +130,6 @@ public class JvnServerImpl
 	public  JvnObject jvnLookupObject(String jon)
 	throws jvn.JvnException {
 		// to be completed 
-		try{
-			JvnObject tmp = this.coordinator.jvnLookupObject(jon, this);
-	        if (tmp != null) {
-	            this.objectsTable.put(tmp.jvnGetObjectId(), tmp);
-	        }
-	        return tmp;
-		}catch(Exception e){
-			throw new JvnException("jvnLookupObject in jvnServerImpl: "+e);
-		}
-        
 	}	
 	
 	/**
@@ -160,13 +144,6 @@ public class JvnServerImpl
 	   
 	   try{
 		   
-		   Serializable objectState = objectsTable.get(joi).jvnGetObjectState();
-			
-			// Ask the coordinator for a read lock and update lock cache
-			objectState =  this.coordinator.jvnLockRead(joi, js);
-			
-			return objectState;
-			
 		} catch (Exception e) {
 			throw new JvnException("jvnLockRead in jvnServerImpl: "+e);
 		}
@@ -183,12 +160,6 @@ public class JvnServerImpl
 		// to be completed 
 	   try{
 	   
-		   Serializable objectState = objectsTable.get(joi).jvnGetObjectState();
-	
-		   // Ask the coordinator for a write lock and update lock cache
-		   objectState = this.coordinator.jvnLockWrite(joi, js);
-		   
-		   return objectState;
 
 		} catch (Exception e) {
 			throw new JvnException("jvnLockWrite in jvnServerImpl: "+e);
@@ -206,7 +177,6 @@ public class JvnServerImpl
   public void jvnInvalidateReader(int joi)
 	throws java.rmi.RemoteException,jvn.JvnException {
 		// to be completed 
-	    objectsTable.get(joi).jvnInvalidateReader();
 	};
 	    
 	/**
@@ -218,7 +188,6 @@ public class JvnServerImpl
   public Serializable jvnInvalidateWriter(int joi)
 	throws java.rmi.RemoteException,jvn.JvnException { 
 		// to be completed 
-        return objectsTable.get(joi).jvnInvalidateWriter();
 	};
 	
 	/**
@@ -230,7 +199,6 @@ public class JvnServerImpl
    public Serializable jvnInvalidateWriterForReader(int joi)
 	 throws java.rmi.RemoteException,jvn.JvnException { 
 		// to be completed 
-		return objectsTable.get(joi).jvnInvalidateWriterForReader();
 	 };
 
 }

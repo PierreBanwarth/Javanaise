@@ -42,17 +42,6 @@ public class JvnCoordImpl
 	}
 	
 	
-	public static void main(String[] args){
-		
-		try{
-			LocateRegistry.createRegistry(5555);
-            JvnCoordImpl coordinator = new JvnCoordImpl();
-            Naming.rebind("//localhost:5555/COORDINATOR/", coordinator);
-            System.out.println("Coordinator Ready!");
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
 
   /**
   *  Allocate a NEW JVN object id (usually allocated to a 
@@ -77,18 +66,7 @@ public class JvnCoordImpl
   **/
   public void jvnRegisterObject(String jon, JvnObject jo, JvnRemoteServer js)
   throws java.rmi.RemoteException,jvn.JvnException{
-    // to be completed 
-		if(this.symbolicName_objId_Map.containsKey(jon)) {
-			System.out.println("existing object with symbollic name = " + jon);
-			System.out.println("id : " + this.rmServer_objId_Map.get(js));
-			System.out.println("rmObj : " + this.objId_rmObject_Map.get(this.rmServer_objId_Map.get(js)));
-		}else{
-			System.out.println("No object with symbollic name = " + jon);
-			System.out.println("id : " + this.rmServer_objId_Map.get(js));
-			System.out.println("rmObj : " + this.objId_rmObject_Map.get(this.rmServer_objId_Map.get(js)));
-			this.symbolicName_objId_Map.put(jon, this.rmServer_objId_Map.get(js));
-			this.objId_rmObject_Map.put(this.rmServer_objId_Map.get(js), jo);
-		}
+		
 		return;
   }
   
@@ -118,22 +96,7 @@ public class JvnCoordImpl
   **/
    public Serializable jvnLockRead(int joi, JvnRemoteServer js)
    throws java.rmi.RemoteException, JvnException{
-		// to be completed 
-	   switch(this.objectsState){
-		case R:
-			this.rmServer_objId_Map.put(js, joi);
-			return State.R;
-		case W:
-			if(this.rmServer_objId_Map.entrySet().size() > 1) throw new JvnException("[ServerStack & jvnLockRead()] State error in JvnCoordImpl");
-			for(Object S_O : this.rmServer_objId_Map.entrySet()){
-				Map.Entry<JvnRemoteServer , Integer> rmServer_objId = (Entry<JvnRemoteServer, Integer>) S_O;
-				rmServer_objId.getKey().jvnInvalidateWriterForReader(rmServer_objId.getValue());
-			}
-			this.rmServer_objId_Map.put(js, joi);
-			return State.R;
-		default:
-			throw new JvnException("[jvnLockRead()] State error in JvnCoordImpl");
-		}
+	return joi;
    }
 
   /**
@@ -145,28 +108,8 @@ public class JvnCoordImpl
   **/
    public Serializable jvnLockWrite(int joi, JvnRemoteServer js)
    throws java.rmi.RemoteException, JvnException{
+	return joi;
 		// to be completed 
-	   switch(this.objectsState){
-		case R:
-			for(Object S_O : this.rmServer_objId_Map.entrySet()){
-				Map.Entry<JvnRemoteServer , Integer> rmServer_objId = (Entry<JvnRemoteServer, Integer>) S_O;
-				rmServer_objId.getKey().jvnInvalidateReader(rmServer_objId.getValue());
-			}
-			this.rmServer_objId_Map = new HashMap<JvnRemoteServer , Integer>();
-			this.rmServer_objId_Map.put(js, joi);
-			return State.W;
-		case W:
-			if(this.rmServer_objId_Map.entrySet().size() > 1) throw new JvnException("[ServerStack & jvnLockWrite()] State error in JvnCoordImpl");
-			for(Object S_O : this.rmServer_objId_Map.entrySet()){
-				Map.Entry<JvnRemoteServer , Integer> rmServer_objId = (Entry<JvnRemoteServer, Integer>) S_O;
-				rmServer_objId.getKey().jvnInvalidateWriter(rmServer_objId.getValue());
-			}
-			this.rmServer_objId_Map = new HashMap<JvnRemoteServer , Integer>();
-			this.rmServer_objId_Map.put(js, joi);
-			return State.W;
-		default:
-			throw new JvnException("[jvnLockRead()] State error in JvnCoordImpl");
-		}
    }
 
 	/**
