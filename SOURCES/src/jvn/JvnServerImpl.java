@@ -92,21 +92,21 @@ public class JvnServerImpl
 		JvnObject jo = null;
 		//System.out.println("createObject in JSI : "+ o + " :class: " + o.getClass());
 		
-		//if(o.getClass().equals(irc.Sentence))
+		if(o.getClass().equals(irc.Sentence))
 		
 		try {
 			// If we get an id, create a new jvnObject ( with write lock by default) AND
 			// create a new entry in the lock and object cache
 			joi = this.coordinator.jvnGetObjectId();
 	
-	        jo = new JvnObjectImpl(joi , o);
+	/*      jo = new JvnObjectImpl(joi);
 				
 			objectsTable.put(joi,  jo);
-	
+	*/
 		} catch (Exception e) {
 			throw new JvnException("jvnCreateObject: "+e);
 		}
-		System.out.println("object created with serializable = "+o);
+		
 		return jo; 
 	}
 	

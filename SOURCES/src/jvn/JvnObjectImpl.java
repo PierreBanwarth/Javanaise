@@ -13,11 +13,10 @@ public class JvnObjectImpl implements JvnObject{
 	
 	private int id;
 	
-	public JvnObjectImpl(int id, Serializable o){
+	public JvnObjectImpl(int id){
 		super();
 		this.id = id;
 		state = State.W;
-		objet = o;
 	}
 
 	public  void  jvnLockRead() throws JvnException {
@@ -25,7 +24,7 @@ public class JvnObjectImpl implements JvnObject{
 		System.out.println("lockR :"+state);
 		switch(state){
 		case NL:
-			//objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.id);
+			objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.id);
 			state = State.R;
 			break;
 		case R:
@@ -48,7 +47,7 @@ public class JvnObjectImpl implements JvnObject{
 		System.out.println("lockW :"+state);
 		switch(state){
 		case NL:
-			//objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
+			objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
 			break;
 		case RC:
 			JvnServerImpl.jvnGetServer().jvnLockWrite(this.jvnGetObjectId());
@@ -81,7 +80,7 @@ public class JvnObjectImpl implements JvnObject{
 				//state = State.WC;
 				//break;
 			case NL:
-				//objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
+				objet = JvnServerImpl.jvnGetServer().jvnLockRead(this.jvnGetObjectId());
 				//objet = JvnServerImpl.jvnGetServer().
 
 				state = State.NL;
